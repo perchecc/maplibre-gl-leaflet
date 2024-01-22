@@ -1,23 +1,23 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD
-        define(['leaflet', 'mapbox-gl'], factory);
+        define(['leaflet', 'maplibre-gl'], factory);
     } else if (typeof exports === 'object') {
         // Node, CommonJS-like
-        module.exports = factory(require('leaflet'), require('mapbox-gl'));
+        module.exports = factory(require('leaflet'), require('maplibre-gl'));
     } else {
         // Browser globals (root is window)
-        root.returnExports = factory(window.L, window.mapboxgl);
+        root.returnExports = factory(window.L, window.maplibregl);
     }
-}(this, function (L, mapboxgl) {
-    L.MapboxGL = L.Layer.extend({
+}(this, function (L, maplibregl) {
+    L.MaplibreGL = L.Layer.extend({
             options: {
             updateInterval: 32,
             // How much to extend the overlay view (relative to map size)
             // e.g. 0.1 would be 10% of map view in each direction
             padding: 0.1,
             // whether or not to register the mouse and keyboard
-            // events on the mapbox overlay
+            // events on the maplibre overlay
             interactive: false,
             // set the tilepane as the default pane to draw gl tiles
             pane: 'tilePane'
@@ -26,9 +26,9 @@
         initialize: function (options) {
             L.setOptions(this, options);
 
-            if (options.accessToken) {
-                mapboxgl.accessToken = options.accessToken;
-            }
+            // if (options.accessToken) {
+            //     maplibregl.accessToken = options.accessToken;
+            // }
 
             // setup throttling the update event when panning
             this._throttledUpdate = L.Util.throttle(this._update, this.options.updateInterval, this);
@@ -46,7 +46,6 @@
 
             this._offset = this._map.containerPointToLayerPoint([0, 0]);
 
-            // work around https://github.com/mapbox/mapbox-gl-leaflet/issues/47
             if (map.options.zoomAnimation) {
                 L.DomEvent.on(map._proxy, L.DomUtil.TRANSITION_END, this._transitionEnd, this);
             }
@@ -73,7 +72,7 @@
             };
         },
 
-        getMapboxMap: function () {
+        getMaplibreMap: function () {
             return this._glMap;
         },
 
@@ -126,7 +125,7 @@
                 attributionControl: false
             });
 
-            if (!this._glMap) this._glMap = new mapboxgl.Map(options);
+            if (!this._glMap) this._glMap = new maplibregl.Map(options);
             else {
                 this._glMap.setCenter(options.center);
                 this._glMap.setZoom(options.zoom);
@@ -137,7 +136,7 @@
             this._transformGL(this._glMap);
 
             if (this._glMap._canvas.canvas) {
-                // older versions of mapbox-gl surfaced the canvas differently
+                // older versions of maplibre-gl surfaced the canvas differently
                 this._glMap._actualCanvas = this._glMap._canvas.canvas;
             } else {
                 this._glMap._actualCanvas = this._glMap._canvas;
@@ -187,7 +186,7 @@
                     gl.resize();
                 }
             } else {
-                // older versions of mapbox-gl surfaced update publicly
+                // older versions of maplibre-gl surfaced update publicly
                 if (gl._update !== null && gl._update !== undefined){
                     gl._update();
                 } else {
@@ -203,7 +202,7 @@
             // calling setView directly causes sync issues because it uses requestAnimFrame
 
             var tr = gl.transform;
-            tr.center = mapboxgl.LngLat.convert([center.lng, center.lat]);
+            tr.center = maplibregl.LngLat.convert([center.lng, center.lat]);
             tr.zoom = this._map.getZoom() - 1;
         },
 
@@ -246,7 +245,6 @@
 
             L.DomUtil.setTransform(
                 this._glMap._actualCanvas,
-                // https://github.com/mapbox/mapbox-gl-leaflet/pull/130
                 null,
                 scale
             );
@@ -285,8 +283,8 @@
         }
     });
 
-    L.mapboxGL = function (options) {
-        return new L.MapboxGL(options);
+    L.maplibreGL = function (options) {
+        return new L.MaplibreGL(options);
     };
 
 }));
